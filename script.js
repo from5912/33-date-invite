@@ -51,7 +51,7 @@ async function openAdmin(){
   document.querySelectorAll(".adminrow .danger").forEach(b=>b.onclick=()=>deleteInvite(pin,b.dataset.id,b.closest(".adminrow")));
   $("#deleteAll").onclick=async()=>{if(!confirm("確定刪除全部邀約？"))return;const rr=await fetch("/api/admin",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({pin,all:true})});if(rr.ok)openAdminWithPin(pin);else hint.textContent="刪除失敗"};
   $("#backHome").onclick=first;
- }catch(e){content.innerHTML='<div class="summary">管理密碼錯誤或讀取失敗。</div><button class="secondary" id="backHome" style="width:100%">返回</button>';$("#backHome").onclick=first}
+ }catch(e){content.innerHTML='<div class="summary">管理頁讀取失敗<br><small style="display:block;margin-top:8px;color:#ff91aa">原因：'+String(e.message||"未知錯誤").replace(/[<>&]/g,"")+'</small></div><button class="secondary" id="backHome" style="width:100%">返回</button>';$("#backHome").onclick=first}
 }
 async function openAdminWithPin(pin){const r=await fetch("/api/admin?pin="+encodeURIComponent(pin));const data=await r.json();if(r.ok&&!data.events.length){content.innerHTML='<div class="summary">邀約已清空。</div><button class="secondary" id="backHome" style="width:100%">返回</button>';$("#backHome").onclick=first}else openAdmin()}
 async function deleteInvite(pin,id,row){if(!confirm("確定刪除這筆邀約？"))return;const r=await fetch("/api/admin",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({pin,id})});if(r.ok){row.remove();hint.textContent="已刪除邀約"}else hint.textContent="刪除失敗"}
