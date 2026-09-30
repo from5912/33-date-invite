@@ -1,1 +1,4 @@
-.wrangler/
+﻿.wrangler/
+.dev.vars
+.env
+.env.*
