@@ -16,7 +16,6 @@ const buttons=[...document.querySelectorAll(".day[data-day]")];await Promise.all
 $("#picked").textContent="挑一個亮著的日期";
 buttons.forEach(btn=>btn.onclick=()=>{const day=+btn.dataset.day;state.dates=[day];state.time=null;buttons.forEach(x=>x.classList.remove("selected"));btn.classList.add("selected");$("#picked").textContent="10/"+day+"｜選一個任務時間";$("#times").innerHTML=state.slots[day].map(t=>'<button class="time" data-time="'+t+'">'+t+'</button>').join("");document.querySelectorAll(".time").forEach(t=>t.onclick=()=>{state.time=t.dataset.time;document.querySelectorAll(".time").forEach(x=>x.classList.remove("selected"));t.classList.add("selected")});bindTargets()});
 $("#dateNext").onclick=e=>state.dates.length&&state.time?lockAndGo(e.currentTarget,food):hint.textContent="日期跟時間都要選喔"}
-}
 function showFoodMsg(btn,msg){document.querySelectorAll(".foodmsg").forEach(x=>x.remove());const m=document.createElement("span");m.className="foodmsg";m.textContent=msg;btn.appendChild(m);requestAnimationFrame(()=>m.classList.add("show"));setTimeout(()=>{m.classList.remove("show");setTimeout(()=>m.remove(),220)},1500)}
 function food(){
  head(3,"food","出發前先吃什麼？","吃飽再去 PK。這題看起來可以選。");
