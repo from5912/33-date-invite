@@ -1,4 +1,4 @@
-const $=s=>document.querySelector(s), title=$("#title"),sub=$("#subtitle"),content=$("#content"),hint=$("#hint"),icon=$("#iconbox"),step=$("#step"),card=$("#card");
+const $=s=>document.querySelector(s), title=$("#title"),sub=$("#subtitle"),content=$("#content"),hint=$("#hint"),icon=$("#iconbox"),step=$("#step"),card=$("#card"),logo=$("#eyebrow");
 const state={dates:[],time:null,food:null,noRuns:0,foodTries:0,slots:{}};
 const icons={
 versus:'<svg viewBox="0 0 48 48"><path d="M11 13l26 22M37 13L11 35"/><path d="M8 9l7 1-5 5M40 9l-7 1 5 5M8 39l7-1-5-5M40 39l-7-1 5-5"/></svg>',
@@ -39,4 +39,20 @@ function final(){
  $("#confirm").onclick=async e=>{const btn=e.currentTarget;btn.disabled=true;btn.textContent="任務建立中...";hint.textContent="";try{const r=await fetch("/api/confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({date:"2026-10-"+String(state.dates[0]).padStart(2,"0"),time:state.time})});const data=await r.json();if(!r.ok)throw new Error(data.error||"建立失敗");btn.textContent="任務建立完成";hint.textContent="已經記下來了。";$("#again").style.display="none"}catch(err){btn.disabled=false;btn.textContent="再試一次";hint.textContent=err.message||"建立失敗，晚點再試"}};
  $("#again").onclick=()=>{state.dates=[];state.time=null;state.food=null;state.slots={};state.noRuns=0;state.foodTries=0;first()}
 }
+let logoTaps=0,logoTimer=null;
+logo.addEventListener("click",()=>{logoTaps++;clearTimeout(logoTimer);logoTimer=setTimeout(()=>logoTaps=0,650);if(logoTaps>=3){logoTaps=0;openAdmin()}});
+async function openAdmin(){
+ const pin=prompt("管理密碼"); if(!pin)return;
+ head(0,"lock","任務管理","這裡只給 Alan 用。");
+ step.textContent="ADMIN"; content.innerHTML='<p class="selectedText">讀取任務中...</p>'; hint.textContent="";
+ try{const r=await fetch("/api/admin?pin="+encodeURIComponent(pin));const data=await r.json();if(!r.ok)throw new Error(data.error||"無法進入");
+  if(!data.events.length){content.innerHTML='<div class="summary">目前沒有可刪除的邀約。</div><button class="secondary" id="backHome" style="width:100%">返回</button>';$("#backHome").onclick=first;return}
+  content.innerHTML='<div class="adminlist">'+data.events.map(e=>'<div class="adminrow"><div><b>'+e.date+'　'+e.time+'</b><small>'+e.title+'</small></div><button class="danger" data-id="'+e.id+'">刪除</button></div>').join("")+'</div><button class="danger dangerAll" id="deleteAll">一鍵刪除全部邀約</button><button class="secondary" id="backHome" style="width:100%;margin-top:10px">返回</button>';
+  document.querySelectorAll(".adminrow .danger").forEach(b=>b.onclick=()=>deleteInvite(pin,b.dataset.id,b.closest(".adminrow")));
+  $("#deleteAll").onclick=async()=>{if(!confirm("確定刪除全部邀約？"))return;const rr=await fetch("/api/admin",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({pin,all:true})});if(rr.ok)openAdminWithPin(pin);else hint.textContent="刪除失敗"};
+  $("#backHome").onclick=first;
+ }catch(e){content.innerHTML='<div class="summary">管理密碼錯誤或讀取失敗。</div><button class="secondary" id="backHome" style="width:100%">返回</button>';$("#backHome").onclick=first}
+}
+async function openAdminWithPin(pin){const r=await fetch("/api/admin?pin="+encodeURIComponent(pin));const data=await r.json();if(r.ok&&!data.events.length){content.innerHTML='<div class="summary">邀約已清空。</div><button class="secondary" id="backHome" style="width:100%">返回</button>';$("#backHome").onclick=first}else openAdmin()}
+async function deleteInvite(pin,id,row){if(!confirm("確定刪除這筆邀約？"))return;const r=await fetch("/api/admin",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({pin,id})});if(r.ok){row.remove();hint.textContent="已刪除邀約"}else hint.textContent="刪除失敗"}
 first();
