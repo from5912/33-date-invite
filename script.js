@@ -33,9 +33,9 @@ function food(){
  $("#foodNext").onclick=e=>state.food?lockAndGo(e.currentTarget,final):hint.textContent="先選一個想吃的";
 }
 function final(){
- head(4,"lock","挑戰成立","先吃飽，再換個戰場 PK。");
+ head(4,"lock","挑戰成立","先吃飽，再去挑戰恐怖密室逃脫。");
  const ds=state.dates.sort((a,b)=>a-b).map(d=>"10/"+d).join("、");
- render('<div class="summary">任務時間<br><b>'+ds+'　'+state.time+'</b><br><br>吃什麼<br><b>到時候看心情</b><br><br>接下來<br><b>吃飽 → PK → 逛逛</b></div><p style="text-align:center;line-height:1.9;font-weight:700">地點先保密。<br>想知道？去問欸冷吧。<br>這次看看誰比較給力。<br><span style="font-size:13px;font-weight:500;color:#a27e89">輸的人請喝飲料。</span></p><div class="actions"><button class="primary" id="confirm">確認任務</button><button class="secondary" id="again">重新選一次</button></div>');
+ render('<div class="summary">任務時間<br><b>'+ds+'　'+state.time+'</b><br><br>吃什麼<br><b>到時候看心情</b><br><br>本次挑戰<br><b>恐怖密室逃脫</b><br><br>接下來<br><b>吃飽 → 恐怖密室逃脫 → 逛逛</b></div><p style="text-align:center;line-height:1.9;font-weight:700">密室地點跟主題先保密。<br>想知道？去問欸冷吧。<br>這次看看誰比較給力。<br><span style="font-size:13px;font-weight:500;color:#a27e89">輸的人請喝飲料。</span></p><div class="actions"><button class="primary" id="confirm">確認任務</button><button class="secondary" id="again">重新選一次</button></div>');
  $("#confirm").onclick=async e=>{const btn=e.currentTarget;btn.disabled=true;btn.textContent="任務建立中...";hint.textContent="";try{const r=await fetch("/api/confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({date:"2026-10-"+String(state.dates[0]).padStart(2,"0"),time:state.time})});const data=await r.json();if(!r.ok)throw new Error(data.error||"建立失敗");btn.textContent="任務建立完成";hint.textContent="已經記下來了。";$("#again").style.display="none"}catch(err){btn.disabled=false;btn.textContent="再試一次";hint.textContent=err.message||"建立失敗，晚點再試"}};
  $("#again").onclick=()=>{state.dates=[];state.time=null;state.food=null;state.slots={};state.noRuns=0;state.foodTries=0;first()}
 }
